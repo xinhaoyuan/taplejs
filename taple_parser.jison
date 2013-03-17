@@ -77,7 +77,13 @@ SymbolSeq        : SYMBOL
                    {{ $$ = $1; $$.push($3); }}
                  ;
 
-SymbolList       : LB0 SymbolSeq RB0
+SymbolList       : LB0 RB0
+                   { $$ = []; }
+                 | LB1 RB1
+                   { $$ = []; }
+                 | LB2 RB2
+                   { $$ = []; }
+                 | LB0 SymbolSeq RB0
                    { $$ = $2 }
                  | LB1 SymbolSeq RB1
                    { $$ = $2 }
