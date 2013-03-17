@@ -51,7 +51,8 @@ function compile2js(ast)
             result += "if(!('" + ast.args[i] + "' in args))args['" + 
                 ast.args[i] + "']=args['.unnamed'][" + i + "];";
         }
-        result +=  "return " + compile2js(ast.body)
+        result += "delete args['.unnamed'];"
+        result += "return " + compile2js(ast.body)
             + "})"
         return result;
     }
