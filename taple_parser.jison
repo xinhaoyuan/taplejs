@@ -10,14 +10,12 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=]
 "lambda"                   { return 'LAMBDA'; }
 "if"                       { return 'IF'; }
 "begin"                    { return 'BEGIN'; }
-{SYMSTART}{SYMCHARS}*{SYMSTART}{SYMCHARS}*
-                           { return 'SYMBOL'; }
-{SYMSTART}                 { return 'SYMBOL'; }
 "0x"[0-9a-fA-F]+           { return 'HEXINT'; }
 "0"[0-7]*                  { return 'OCTINT'; }
 [+\-]"0"+                  { return 'ZERO'; }
 [+\-]?[0-9]*"."[0-9]+      { return 'REALNUMBER'; }
 [+\-]?[1-9][0-9]*          { return 'DECINT'; }
+{SYMSTART}{SYMCHARS}*      { return 'SYMBOL'; }
 "\""([^\\\"]|\\.)*"\""     { return 'STRING'; }
 "'"{SYMCHARS}+             { return 'QUOTE'; }
 ":"                        { return ':'; }

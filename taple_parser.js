@@ -411,48 +411,46 @@ case 3: return 29;
 break;
 case 4: return 34; 
 break;
-case 5: return 11; 
+case 5: return 37; 
 break;
-case 6: return 11; 
+case 6: return 38; 
 break;
-case 7: return 37; 
+case 7: return 36; 
 break;
-case 8: return 38; 
+case 8: return 40; 
 break;
-case 9: return 36; 
+case 9: return 39; 
 break;
-case 10: return 40; 
+case 10: return 11; 
 break;
-case 11: return 39; 
+case 11: return 41; 
 break;
-case 12: return 41; 
+case 12: return 42; 
 break;
-case 13: return 42; 
+case 13: return 23; 
 break;
-case 14: return 23; 
+case 14: return 13; 
 break;
-case 15: return 13; 
+case 15: return 16; 
 break;
-case 16: return 16; 
+case 16: return 17; 
 break;
-case 17: return 17; 
+case 17: return 18; 
 break;
-case 18: return 18; 
+case 18: return 19; 
 break;
-case 19: return 19; 
+case 19: return 20; 
 break;
-case 20: return 20; 
+case 20: return 21; 
 break;
-case 21: return 21; 
+case 21: return 4; 
 break;
-case 22: return 4; 
-break;
-case 23: return 9; 
+case 22: return 9; 
 break;
 }
 },
-rules: [/^(?:[\s]*;.*[\n])/,/^(?:set!)/,/^(?:lambda\b)/,/^(?:if\b)/,/^(?:begin\b)/,/^(?:([a-zA-Z!@#$%\^&*_\-+=])([a-zA-Z0-9!@#$%\^&*_\-+=])*([a-zA-Z!@#$%\^&*_\-+=])([a-zA-Z0-9!@#$%\^&*_\-+=])*)/,/^(?:([a-zA-Z!@#$%\^&*_\-+=]))/,/^(?:0x[0-9a-fA-F]+)/,/^(?:0[0-7]*)/,/^(?:[+\-]0+)/,/^(?:[+\-]?[0-9]*\.[0-9]+)/,/^(?:[+\-]?[1-9][0-9]*)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([a-zA-Z0-9!@#$%\^&*_\-+=])+)/,/^(?::)/,/^(?:\.)/,/^(?:\([\s]*)/,/^(?:[\s]*\))/,/^(?:\[[\s]*)/,/^(?:[\s]*\])/,/^(?:\{[\s]*)/,/^(?:[\s]*\})/,/^(?:[\s\n]+)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"inclusive":true}}
+rules: [/^(?:[\s]*;.*[\n])/,/^(?:set!)/,/^(?:lambda\b)/,/^(?:if\b)/,/^(?:begin\b)/,/^(?:0x[0-9a-fA-F]+)/,/^(?:0[0-7]*)/,/^(?:[+\-]0+)/,/^(?:[+\-]?[0-9]*\.[0-9]+)/,/^(?:[+\-]?[1-9][0-9]*)/,/^(?:([a-zA-Z!@#$%\^&*_\-+=])([a-zA-Z0-9!@#$%\^&*_\-+=])*)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([a-zA-Z0-9!@#$%\^&*_\-+=])+)/,/^(?::)/,/^(?:\.)/,/^(?:\([\s]*)/,/^(?:[\s]*\))/,/^(?:\[[\s]*)/,/^(?:[\s]*\])/,/^(?:\{[\s]*)/,/^(?:[\s]*\})/,/^(?:[\s\n]+)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],"inclusive":true}}
 };
 return lexer;
 })();
