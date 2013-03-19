@@ -71,10 +71,43 @@ function compile2js(ast)
     else return "(undefined)";
 }
 
+var taple_parser = require("./taple_parser");
+
+function eval_taple_text(source, scope)
+{
+    return (new Function("with(this){ return" + compile2js(taple_parser.parse(source)) + "}")).call(scope)
+}
+
+// Runtime
+
+var modules = {
+    'foo': { loaded: true, exports: "bar" }
+};
+
+function __require(args)
+{
+    if (!("name" in args && args['.unnamed'].length > 1)) args.name = args['.unnamed'][0];
+    return import_module(args.name);
+}
+
+function import_module(name)
+{
+    name = String(name);
+    if (!(name in modules)) return null;
+    if (modules[name].loading) throw "recursive require";
+    if (modules[name].loaded) return modules[name].exports;
+    modules[name].loading = true;
+    var scope = new Object();
+    scope.__global = { require: __require }
+    eval_taple_text(source, scope);
+    modules[name].exports = scope.__global.exports;
+    modules[name].loaded = true;
+}
+
+var eval_scope = { __global: { require: __require } };
 function eval_taple(source)
 {
-    var ast = taple_parser.parse(source);
-    var result = compile2js(ast);
-    if (typeof __global == "undefined") __global = {};
-    return eval(result);
+    return eval_taple_text(source, eval_scope);
 }
+
+console.log(eval_taple("(require \"foo\")"));
