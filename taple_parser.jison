@@ -65,6 +65,17 @@ Ref              : SYMBOL
                         $$ = { type: 'LiteralRef', name: $1 };
                      }
                    }
+                 | LAMBDA '.' SYMBOL
+                   {
+                     if ($3 in $scope_refs) {
+                          var s = $scope_refs[$3];
+                          $$ = { type: 'LambdaRef', name: $3, index: s[s.length - 1] };
+                     }
+                     else
+                     {
+                          $$ = { type: 'Error', msg: 'Invalid lambda reference: ' + $3 + '.' };
+                     }
+                   }
                  | Expr '.' SYMBOL
                    { $$ = { type: 'LookupRef', base: $1, name: $3 }; }
                  ;

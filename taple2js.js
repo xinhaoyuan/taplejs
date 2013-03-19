@@ -45,7 +45,7 @@ function compile2js(ast)
         return result;
     }
     else if (ast.type == "Lambda") {
-        result = "(function(args){var __scope_" + ast.depth +
+        result = "(function f" + ast.depth + "(args){var __scope_" + ast.depth +
             "=args;";
         for (var i = 0; i < ast.args.length; ++ i) {
             result += "if(!('" + ast.args[i] + "' in args))args['" + 
@@ -65,8 +65,14 @@ function compile2js(ast)
     else if (ast.type == "ScopeRef") { 
         return "(__scope_" + ast.index + ")";
     }
+    else if (ast.type == "LambdaRef") { 
+        return "(f" + ast.index + ")"
+    }
     else if (ast.type == "LookupRef") {
         return "(" + compile2js(ast.base) + "[\"" + ast.name + "\"])"
+    }
+    else if (ast.type == "Error") {
+        throw ast.msg;
     }
     else return "(undefined)";
 }
