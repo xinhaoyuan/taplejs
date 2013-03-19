@@ -2,12 +2,12 @@ function compile2js(ast)
 {
     var result;
     if (ast.type == "String") return ast.value
-    else if (ast.type == "Integer") return String(ast.value);
-    else if (ast.type == "RealNumber") return String(ast.value);
+    else if (ast.type == "Integer") return "(" + String(ast.value) + ")";
+    else if (ast.type == "RealNumber") return "(" + String(ast.value) + ")";
     else if (ast.type == "Quote") {
-        if (ast.value == "'t") return true;
-        else if (ast.value == "'f") return false;
-        else return undefined; 
+        if (ast.value == "'t") return "(true)";
+        else if (ast.value == "'f") return "(false)";
+        else return "(undefined)"; 
     }
     else if (ast.type == "Begin") {
         result = "(";
