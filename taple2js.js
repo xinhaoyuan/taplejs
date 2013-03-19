@@ -71,7 +71,8 @@ function compile2js(ast)
     else return "(undefined)";
 }
 
-var taple_parser = require("./taple_parser");
+if (typeof require != "undefined")
+    taple_parser = require("./taple_parser");
 
 function eval_taple_text(source, scope)
 {
@@ -79,15 +80,12 @@ function eval_taple_text(source, scope)
 }
 
 // Runtime
-
-var modules = {
-    'foo': { loaded: true, exports: "bar" }
-};
-
-function __require(args)
+function __wrap_js_func(func)
 {
-    if (!("name" in args && args['.unnamed'].length > 1)) args.name = args['.unnamed'][0];
-    return import_module(args.name);
+    return function(args) {
+        args = args['.unnamed'];
+        return func.apply(null, args);
+    }
 }
 
 function import_module(name)
@@ -99,15 +97,18 @@ function import_module(name)
     modules[name].loading = true;
     var scope = new Object();
     scope.__global = { require: __require }
-    eval_taple_text(source, scope);
+    eval_taple_text(modules[name].source, scope);
     modules[name].exports = scope.__global.exports;
     modules[name].loaded = true;
+    return scope.__global.exports;
 }
+
+__require = __wrap_js_func(import_module);
+
+var modules = { }
 
 var eval_scope = { __global: { require: __require } };
 function eval_taple(source)
 {
     return eval_taple_text(source, eval_scope);
 }
-
-console.log(eval_taple("(require \"foo\")"));

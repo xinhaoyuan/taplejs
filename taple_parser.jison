@@ -5,7 +5,7 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=]
 
 %%
 
-[\s]*";".*[\n]             { /* comment */ }
+[\s]*";"[^\n]*             { /* comment */ }
 "set!"                     { return 'SET'; }
 "lambda"                   { return 'LAMBDA'; }
 "if"                       { return 'IF'; }
