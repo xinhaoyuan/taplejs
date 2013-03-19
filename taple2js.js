@@ -98,14 +98,17 @@ function import_module(name)
     name = String(name);
     if (!(name in modules)) return null;
     if (modules[name].loading) throw "recursive require";
-    if (modules[name].loaded) return modules[name].exports;
-    modules[name].loading = true;
-    var scope = new Object();
-    scope.__global = { require: __require }
-    eval_taple_text(modules[name].source, scope);
-    modules[name].exports = scope.__global.exports;
-    modules[name].loaded = true;
-    return scope.__global.exports;
+    if (!modules[name].loaded) 
+    {
+        modules[name].loading = true;
+        var scope = new Object();
+        scope.__global = { require: __require }
+        eval_taple_text(modules[name].source, scope);
+        modules[name].exports = scope.__global.exports;
+        modules[name].loaded = true;
+        modules[name].loading = false;
+    }
+    return modules[name].exports;
 }
 
 __require = __wrap_js_func(["name"], import_module);
