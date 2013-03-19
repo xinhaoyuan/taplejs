@@ -80,11 +80,16 @@ function eval_taple_text(source, scope)
 }
 
 // Runtime
-function __wrap_js_func(func)
+function __wrap_js_func(argnames, func)
 {
     return function(args) {
-        args = args['.unnamed'];
-        return func.apply(null, args);
+        var argv = args['.unnamed'];
+        for (var i = 0; i < argnames.length; ++ i)
+        {
+            if (argnames[i] in args)
+                argv[i] = args[argnames[i]]
+        }
+        return func.apply(null, argv);
     }
 }
 
@@ -103,7 +108,7 @@ function import_module(name)
     return scope.__global.exports;
 }
 
-__require = __wrap_js_func(import_module);
+__require = __wrap_js_func(["name"], import_module);
 
 var modules = { }
 

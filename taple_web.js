@@ -1,7 +1,7 @@
 // Sample runtime
 modules['io'] = { loaded: true,
                   exports: {
-                      println: __wrap_js_func(function(ln){
+                      println: __wrap_js_func(["line"], function(ln){
                           $("#taple_console").prepend($("<pre/>").text(String(ln)));
                       })
                   }
