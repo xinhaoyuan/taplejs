@@ -11,7 +11,7 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 3: scopes = []; scope_refs = {}; 
 break;
-case 5: this.$ = { type: "Begin", exps: $$[$0-2] }; return this.$; 
+case 5: this.$ = { type: 'Begin', exps: $$[$0-2] }; return this.$; 
 break;
 case 6: 
                      var idx = scopes.length == 0 ?
@@ -69,7 +69,7 @@ case 21: this.$ = { type: 'Apply', seq: $$[$0] };
 break;
 case 22: this.$ = { type: 'Apply', seq: $$[$0-2], table: $$[$0]  }; 
 break;
-case 27: this.$ = { type: "Branch", condition: $$[$0-4],
+case 27: this.$ = { type: 'Branch', condition: $$[$0-4],
                             then_branch: $$[$0-2],
                             else_branch: $$[$0] }; 
 break;
@@ -87,25 +87,29 @@ case 29:
                    
 break;
 case 30: scopes.pop();
-                     this.$ = { type: "Lambda", 
+                     this.$ = { type: 'Lambda', 
                             depth: scopes.length,
                             args: $$[$0-2], body:
                             { type: 'Begin', exps: $$[$0] }
                             }; 
 break;
 case 31: scopes.pop(); scope_refs[$$[$0-2][0]].pop();
-                     this.$ = { type: "Lambda", 
+                     this.$ = { type: 'Lambda', 
                             depth: scopes.length,
                             args: $$[$0-2][1], body:
                             { type: 'Begin', exps: $$[$0] }
                           }; 
 break;
-case 32: if ($$[$0-2].type == "LiteralRef")
-                        this.$ = { type: "LiteralSet", ref: $$[$0-2], value: $$[$0] };
-                     else this.$ = { type: "Set", ref: $$[$0-2], value: $$[$0] };
+case 32: if ($$[$0-2].type == 'LiteralRef')
+                        this.$ = { type: 'LiteralSet', ref: $$[$0-2], value: $$[$0] };
+                     else if ($$[$0-2].type == 'ScopeRef')
+                        this.$ = { type: 'Error', msg: 'Cannot set the scope reference: ' + $$[$0-2].name + '.' };
+                     else if ($$[$0-2].type == 'LambdaRef')
+                        this.$ = { type: 'Error', msg: 'Cannot set the lambda reference: ' + $$[$0-2].name + '.' };
+                     else this.$ = { type: 'Set', ref: $$[$0-2], value: $$[$0] };
                    
 break;
-case 33: this.$ = { type: "Begin", exps: $$[$0] }; 
+case 33: this.$ = { type: 'Begin', exps: $$[$0] }; 
 break;
 case 34: this.$ = { type: 'Integer', value: 0 } 
 break;

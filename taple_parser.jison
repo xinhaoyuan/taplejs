@@ -45,9 +45,8 @@ ProgStart        : Sep
 
 ProgEnd          : Sep
                  ;
-
 Prog             : ProgStart UnamedExprSeq ProgEnd EOF
-                   { $$ = { type: "Begin", exps: $2 }; return $$; }
+                   { $$ = { type: 'Begin', exps: $2 }; return $$; }
                  ;
 
 Ref              : SYMBOL
@@ -123,7 +122,7 @@ SExprSeq         : UnamedExprSeq
                  ;
 
 IfSeq            : IF SEP Expr SEP Expr SEP Expr
-                   { $$ = { type: "Branch", condition: $3,
+                   { $$ = { type: 'Branch', condition: $3,
                             then_branch: $5,
                             else_branch: $7 }; }
                  ;
@@ -147,14 +146,14 @@ NamedLambdaDef   : LAMBDA SEP SYMBOL SEP SymbolList
 
 LambdaSeq        : UnnamedLambdaDef SEP UnamedExprSeq
                    { $scopes.pop();
-                     $$ = { type: "Lambda", 
+                     $$ = { type: 'Lambda', 
                             depth: $scopes.length,
                             args: $1, body:
                             { type: 'Begin', exps: $3 }
                             }; }
                  | NamedLambdaDef SEP UnamedExprSeq
                    { $scopes.pop(); $scope_refs[$1[0]].pop();
-                     $$ = { type: "Lambda", 
+                     $$ = { type: 'Lambda', 
                             depth: $scopes.length,
                             args: $1[1], body:
                             { type: 'Begin', exps: $3 }
@@ -162,14 +161,18 @@ LambdaSeq        : UnnamedLambdaDef SEP UnamedExprSeq
                  ;
 
 SetSeq           : SET SEP Ref SEP Expr
-                   { if ($3.type == "LiteralRef")
-                        $$ = { type: "LiteralSet", ref: $3, value: $5 };
-                     else $$ = { type: "Set", ref: $3, value: $5 };
+                   { if ($3.type == 'LiteralRef')
+                        $$ = { type: 'LiteralSet', ref: $3, value: $5 };
+                     else if ($3.type == 'ScopeRef')
+                        $$ = { type: 'Error', msg: 'Cannot set the scope reference: ' + $3.name + '.' };
+                     else if ($3.type == 'LambdaRef')
+                        $$ = { type: 'Error', msg: 'Cannot set the lambda reference: ' + $3.name + '.' };
+                     else $$ = { type: 'Set', ref: $3, value: $5 };
                    }
                  ;
 
 BeginSeq         : BEGIN SEP UnamedExprSeq
-                   { $$ = { type: "Begin", exps: $3 }; }
+                   { $$ = { type: 'Begin', exps: $3 }; }
                  ;
 
 Number           : ZERO
