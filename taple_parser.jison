@@ -51,8 +51,12 @@ Prog             : ProgStart UnamedExprSeq ProgEnd EOF
 
 Ref              : SYMBOL
                    { 
-                     var idx = $scopes.length == 0 ?
-                         -1 : $scopes[$scopes.length - 1].indexOf($1);
+                     var idx;
+                     if ($scopes.length > 0)
+                     {
+                        var scope = $scopes[$scopes.length - 1];
+                        idx = $1 == scope.extra ? scope.named.length : scope.named.indexOf($1);
+                     } else idx = -1;
                      if (idx >= 0) 
                         $$ = { type: 'LexicalRef', name: $1, index: idx };
                      else if ($1 in $scope_refs) {
@@ -99,6 +103,29 @@ SymbolList       : LB0 RB0
                    { $$ = $2 }
                  ;
 
+ArgsList         : LB0 RB0
+                   { $$ = { named: [] }; }
+                 | LB1 RB1
+                   { $$ = { named: [] }; }
+                 | LB2 RB2
+                   { $$ = { named: [] }; }
+                 | LB0 SymbolSeq RB0
+                   { $$ = { named: $2 }; }
+                 | LB1 SymbolSeq RB1
+                   { $$ = { named: $2 }; }
+                 | LB2 SymbolSeq RB2
+                   { $$ = { named: $2 }; }
+                 | . SEP SYMBOL
+                   { $$ = { named: [], extra: $3 }; }
+                 | LB0 SymbolSeq SEP '.' SEP SYMBOL RB0
+                   { $$ = { named: $2, extra: $6 }; }
+                 | LB1 SymbolSeq SEP '.' SEP SYMBOL RB1
+                   { $$ = { named: $2, extra: $6 }; }
+                 | LB2 SymbolSeq SEP '.' SEP SYMBOL RB2
+                   { $$ = { named: $2, extra: $6 }; }
+                 ;
+
+
 UnamedExprSeq    : Expr
                    { $$ = [ $1 ]; }
                  | UnamedExprSeq SEP Expr 
@@ -127,14 +154,14 @@ IfSeq            : IF SEP Expr SEP Expr SEP Expr
                             else_branch: $7 }; }
                  ;
 
-UnnamedLambdaDef : LAMBDA SEP SymbolList
+UnnamedLambdaDef : LAMBDA SEP ArgsList
                    { 
                      $scopes.push($3);
                      $$ = $3;
                    }
                  ;
 
-NamedLambdaDef   : LAMBDA SEP SYMBOL SEP SymbolList
+NamedLambdaDef   : LAMBDA SEP SYMBOL SEP ArgsList
                    {
                      $scopes.push($5); 
                      if (!($3 in $scope_refs))

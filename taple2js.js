@@ -45,13 +45,16 @@ function compile2js(ast)
         return result;
     }
     else if (ast.type == "Lambda") {
-        result = "(function f" + ast.depth + "(args){var __scope_" + ast.depth +
-            "=args;";
-        for (var i = 0; i < ast.args.length; ++ i) {
-            result += "if(!('" + ast.args[i] + "' in args))args['" + 
-                ast.args[i] + "']=args['.unnamed'][" + i + "];";
+        var scope_name = "__scope_" + ast.depth;
+        result = "(function f" + ast.depth + "(args){var " + scope_name +
+            "=";
+        result += "extra" in ast.args ? ("{'" + ast.args.extra + "':args};") : "{};";
+        for (var i = 0; i < ast.args.named.length; ++ i) {
+            result += "if('" + ast.args.named[i] + "' in args){" + scope_name + "['" + 
+                ast.args.named[i] + "']=args['" + ast.args.named[i] + "'];delete args['" + ast.args.named[i] +
+                "'];}else " + scope_name + "['" + ast.args.named[i] + "']=args['.unnamed'][" + i + "];";
         }
-        result += "delete args['.unnamed'];"
+        result += "delete args['.unnamed']; args=" + scope_name + ";"
         result += "return " + compile2js(ast.body)
             + "})"
         return result;
