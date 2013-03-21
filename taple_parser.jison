@@ -74,7 +74,7 @@ Ref              : SYMBOL
                         $$ = { type: 'LiteralRef', name: $1 };
                      }
                    }
-                 | LAMBDA '.' SYMBOL
+                 | LAMBDA ':' SYMBOL
                    {
                      if ($3 in $scope_refs) {
                           var s = $scope_refs[$3];
@@ -85,9 +85,9 @@ Ref              : SYMBOL
                           $$ = { type: 'Error', msg: 'Invalid lambda reference: ' + $3 + '.' };
                      }
                    }
-                 | Expr '.' SYMBOL
+                 | Expr ':' SYMBOL
                    { $$ = { type: 'LookupRef', base: $1, name: $3 }; }
-                 | Expr ':' Expr
+                 | Expr '.' Expr
                    { $$ = { type: 'LookupExp', base: $1, ref: $3 }; }
                  ;
 
@@ -140,9 +140,9 @@ UnamedExprSeq    : Expr
                    { $$ = $1; $$.push($3); }
                  ;
 
-NamedExprSeq     : '.' SYMBOL SEP Expr 
+NamedExprSeq     : ':' SYMBOL SEP Expr 
                    { $$ = new Object(); $$[$2] = $4; }
-                 | NamedExprSeq SEP '.' SYMBOL SEP Expr
+                 | NamedExprSeq SEP ':' SYMBOL SEP Expr
                    { $$ = $1; $1[$4] = $6; }
                  ;
 
