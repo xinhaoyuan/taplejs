@@ -74,6 +74,9 @@ function compile2js(ast)
     else if (ast.type == "LookupRef") {
         return "(" + compile2js(ast.base) + "['" + ast.name + "'])"
     }
+    else if (ast.type == "LookupExp") {
+        return "(" + compile2js(ast.base) + "[" + compile2js(ast.ref) "])";
+    }
     else if (ast.type == "Error") {
         throw ast.msg;
     }

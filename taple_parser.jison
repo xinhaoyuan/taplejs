@@ -31,6 +31,8 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=]
 
 /lex
 %left SEP
+%left ':'
+%left '.'
 
 %start Prog
 %%
@@ -46,7 +48,11 @@ ProgStart        : Sep
 ProgEnd          : Sep
                  ;
 Prog             : ProgStart UnamedExprSeq ProgEnd EOF
-                   { $$ = { type: 'Begin', exps: $2 }; return $$; }
+                   { 
+                     $$ = { type: 'Begin', exps: $2 };
+                     if (typeof console != "undefined") console.log("%j", $$);
+                     return $$;
+                   }
                  ;
 
 Ref              : SYMBOL
@@ -81,6 +87,8 @@ Ref              : SYMBOL
                    }
                  | Expr '.' SYMBOL
                    { $$ = { type: 'LookupRef', base: $1, name: $3 }; }
+                 | Expr ':' Expr
+                   { $$ = { type: 'LookupExp', base: $1, ref: $3 }; }
                  ;
 
 SymbolSeq        : SYMBOL
