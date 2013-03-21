@@ -188,13 +188,12 @@ LambdaSeq        : UnnamedLambdaDef SEP UnamedExprSeq
                  ;
 
 SetSeq           : SET SEP Ref SEP Expr
-                   { if ($3.type == 'LiteralRef')
+                   {
+                     if ($3.type == 'LiteralRef')
                         $$ = { type: 'LiteralSet', ref: $3, value: $5 };
-                     else if ($3.type == 'ScopeRef')
-                        $$ = { type: 'Error', msg: 'Cannot set the scope reference: ' + $3.name + '.' };
-                     else if ($3.type == 'LambdaRef')
-                        $$ = { type: 'Error', msg: 'Cannot set the lambda reference: ' + $3.name + '.' };
-                     else $$ = { type: 'Set', ref: $3, value: $5 };
+                     else if ($3.type == 'LexicalRef' || $3.type == 'LookupRef')
+                        $$ = { type: 'Set', ref: $3, value: $5 };
+                     else $$ = { type: 'Error', msg: 'Cannot set the reference: ' + $3.type + '.' };
                    }
                  ;
 

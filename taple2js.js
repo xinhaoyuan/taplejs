@@ -72,7 +72,7 @@ function compile2js(ast)
         return "(f" + ast.index + ")"
     }
     else if (ast.type == "LookupRef") {
-        return "(" + compile2js(ast.base) + "[\"" + ast.name + "\"])"
+        return "(" + compile2js(ast.base) + "['" + ast.name + "'])"
     }
     else if (ast.type == "Error") {
         throw ast.msg;

@@ -124,13 +124,12 @@ case 41: scopes.pop(); scope_refs[$$[$0-2][0]].pop();
                             { type: 'Begin', exps: $$[$0] }
                           }; 
 break;
-case 42: if ($$[$0-2].type == 'LiteralRef')
+case 42:
+                     if ($$[$0-2].type == 'LiteralRef')
                         this.$ = { type: 'LiteralSet', ref: $$[$0-2], value: $$[$0] };
-                     else if ($$[$0-2].type == 'ScopeRef')
-                        this.$ = { type: 'Error', msg: 'Cannot set the scope reference: ' + $$[$0-2].name + '.' };
-                     else if ($$[$0-2].type == 'LambdaRef')
-                        this.$ = { type: 'Error', msg: 'Cannot set the lambda reference: ' + $$[$0-2].name + '.' };
-                     else this.$ = { type: 'Set', ref: $$[$0-2], value: $$[$0] };
+                     else if ($$[$0-2].type == 'LexicalRef' || $$[$0-2].type == 'LookupRef')
+                        this.$ = { type: 'Set', ref: $$[$0-2], value: $$[$0] };
+                     else this.$ = { type: 'Error', msg: 'Cannot set the reference: ' + $$[$0-2].type + '.' };
                    
 break;
 case 43: this.$ = { type: 'Begin', exps: $$[$0] }; 
