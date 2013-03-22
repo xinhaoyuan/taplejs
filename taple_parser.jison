@@ -31,8 +31,7 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|]
 
 /lex
 %left SEP
-%left ':'
-%left '.'
+%left ':' '.'
 
 %start Prog
 %%
@@ -47,6 +46,7 @@ ProgStart        : Sep
 
 ProgEnd          : Sep
                  ;
+
 Prog             : ProgStart UnamedExprSeq ProgEnd EOF
                    { 
                      $$ = { type: 'Begin', exps: $2 };
@@ -61,15 +61,22 @@ Ref              : SYMBOL
                      for (depth = $scopes.length - 1; depth >= 0; -- depth)
                      {
                         var scope = $scopes[depth];
-                        idx = $1 == scope.extra ? scope.named.length : scope.named.indexOf($1);
-                        if (idx == -1 && $1 == scope.name) break;
+                        idx = scope.named.indexOf($1);
+                        if (idx == -1 &&
+                            ($1 == scope.name ||
+                             $1 == scope.extra.named ||
+                             $1 == scope.extra.unnamed)) break;
                         if (idx >= 0) break;
                      } 
 
                      if (idx >= 0) 
                         $$ = { type: 'LexicalRef', name: $1, offset: idx, index: depth };
                      else if (depth >= 0) {
-                        $$ = { type: 'ScopeRef', name: $1, index: depth };
+                        if ($1 == scope.extra.unnamed)
+                           $$ = { type: 'ExtraUnnamedRef', index: depth };
+                        else if ($1 == scope.extra.named)
+                           $$ = { type: 'ExtraNamedRef', index: depth };
+                        else $$ = { type: 'ScopeRef', name: $1, index: depth };
                      }
                      else
                      {
@@ -119,26 +126,48 @@ SymbolList       : LB0 RB0
                    { $$ = $2 }
                  ;
 
+
+ExtraNamedArg    : ':' SEP SYMBOL
+                   { $$ = $3; }
+                 ;
+ExtraUnnamedArg  : '.' SEP SYMBOL
+                   { $$ = $3; }
+                 ;
+
+ExtraArgs        : ExtraNamedArg
+                   { $$ = { named: $1 }; }
+                 | ExtraUnnamedArg
+                   { $$ = { unnamed: $1 }; }
+                 | ExtraUnnamedArg SEP ExtraNamedArg
+                   { $$ = { unnamed: $1, named: $3 }; }
+                 | ExtraNamedArg SEP ExtraUnnamedArg
+                   { $$ = { unnamed: $3, named: $1 }; }
+                 ;
+                                      
 ArgsList         : LB0 RB0
-                   { $$ = { named: [] }; }
+                   { $$ = { named: [], extra: {} }; }
                  | LB1 RB1
-                   { $$ = { named: [] }; }
+                   { $$ = { named: [], extra: {} }; }
                  | LB2 RB2
-                   { $$ = { named: [] }; }
+                   { $$ = { named: [], extra: {} }; }
                  | LB0 SymbolSeq RB0
-                   { $$ = { named: $2 }; }
+                   { $$ = { named: $2, extra: {} }; }
                  | LB1 SymbolSeq RB1
-                   { $$ = { named: $2 }; }
+                   { $$ = { named: $2, extra: {} }; }
                  | LB2 SymbolSeq RB2
-                   { $$ = { named: $2 }; }
-                 | . SEP SYMBOL
-                   { $$ = { named: [], extra: $3 }; }
-                 | LB0 SymbolSeq SEP '.' SEP SYMBOL RB0
-                   { $$ = { named: $2, extra: $6 }; }
-                 | LB1 SymbolSeq SEP '.' SEP SYMBOL RB1
-                   { $$ = { named: $2, extra: $6 }; }
-                 | LB2 SymbolSeq SEP '.' SEP SYMBOL RB2
-                   { $$ = { named: $2, extra: $6 }; }
+                   { $$ = { named: $2, extra: {} }; }
+                 | LB0 ExtraArgs RB0
+                   { $$ = { named: [], extra: $2 }; }
+                 | LB1 ExtraArgs RB1
+                   { $$ = { named: [], extra: $2 }; }
+                 | LB2 ExtraArgs RB2
+                   { $$ = { named: [], extra: $2 }; }
+                 | LB0 SymbolSeq SEP ExtraArgs RB0
+                   { $$ = { named: $2, extra: $4 }; }
+                 | LB1 SymbolSeq SEP ExtraArgs RB1
+                   { $$ = { named: $2, extra: $4 }; }
+                 | LB2 SymbolSeq SEP ExtraArgs RB2
+                   { $$ = { named: $2, extra: $4 }; }
                  ;
 
 
@@ -209,7 +238,8 @@ SetSeq           : SET SEP Ref SEP Expr
                    {
                      if ($3.type == 'LiteralRef')
                         $$ = { type: 'LiteralSet', ref: $3, value: $5 };
-                     else if ($3.type == 'LexicalRef' || $3.type == 'LookupRef')
+                     else if ($3.type == 'ExtraNamedRef' || $3.type == 'ExtraUnnamedRef' || 
+                              $3.type == 'LexicalRef' || $3.type == 'LookupRef')
                         $$ = { type: 'Set', ref: $3, value: $5 };
                      else $$ = { type: 'Error', msg: 'Cannot set the reference: ' + $3.type + '.' };
                    }
