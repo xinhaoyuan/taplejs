@@ -140,10 +140,14 @@ UnamedExprSeq    : Expr
                    { $$ = $1; $$.push($3); }
                  ;
 
-NamedExprSeq     : '.' SYMBOL SEP Expr 
-                   { $$ = new Object(); $$[$2] = $4; }
-                 | NamedExprSeq SEP '.' SYMBOL SEP Expr
-                   { $$ = $1; $1[$4] = $6; }
+NamedExprLabel   : '.' SYMBOL ':'
+                   { $$ = $2; }
+                 ;
+
+NamedExprSeq     : NamedExprLabel SEP Expr 
+                   { $$ = new Object(); $$[$1] = $3; }
+                 | NamedExprSeq SEP NamedExprLabel SEP Expr
+                   { $$ = $1; $1[$3] = $5; }
                  ;
 
 SExprSeq         : UnamedExprSeq
