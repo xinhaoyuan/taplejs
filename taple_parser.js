@@ -13,22 +13,24 @@ case 3: scopes = []; scope_refs = {};
 break;
 case 5: 
                      this.$ = { type: 'Begin', exps: $$[$0-2] };
-                     if (typeof console != "undefined") console.log("%j", this.$);
                      return this.$;
                    
 break;
 case 6: 
-                     var idx;
-                     if (scopes.length > 0)
+                     var idx = -1;
+                     var depth = -1;
+                     for (depth = scopes.length - 1; depth >= 0; -- depth)
                      {
-                        var scope = scopes[scopes.length - 1];
+                        var scope = scopes[depth];
                         idx = $$[$0] == scope.extra ? scope.named.length : scope.named.indexOf($$[$0]);
-                     } else idx = -1;
+                        if (idx == -1 && $$[$0] == scope.name) break;
+                        if (idx >= 0) break;
+                     } 
+
                      if (idx >= 0) 
-                        this.$ = { type: 'LexicalRef', name: $$[$0], index: idx };
-                     else if ($$[$0] in scope_refs) {
-                        var s = scope_refs[$$[$0]];
-                        this.$ = { type: 'ScopeRef', name: $$[$0], index: s[s.length - 1] };
+                        this.$ = { type: 'LexicalRef', name: $$[$0], offset: idx, index: depth };
+                     else if (depth >= 0) {
+                        this.$ = { type: 'ScopeRef', name: $$[$0], index: depth };
                      }
                      else
                      {
@@ -37,9 +39,15 @@ case 6:
                    
 break;
 case 7:
-                     if ($$[$0] in scope_refs) {
-                          var s = scope_refs[$$[$0]];
-                          this.$ = { type: 'LambdaRef', name: $$[$0], index: s[s.length - 1] };
+                     var depth = -1;
+                     for (depth = scopes.length - 1; depth >= 0; -- depth)
+                     {
+                        var scope = scopes[depth];
+                        if ($$[$0] == scope.name) break;
+                     }
+
+                     if (depth >= 0) {
+                          this.$ = { type: 'LambdaRef', name: $$[$0], index: depth };
                      }
                      else
                      {
@@ -105,17 +113,15 @@ case 39: this.$ = { type: 'Branch', condition: $$[$0-4],
                             then_branch: $$[$0-2],
                             else_branch: $$[$0] }; 
 break;
-case 40: 
+case 40:
                      scopes.push($$[$0]);
                      this.$ = $$[$0];
                    
 break;
 case 41:
+                     $$[$0].name = $$[$0-2];
                      scopes.push($$[$0]); 
-                     if (!($$[$0-2] in scope_refs))
-                        scope_refs[$$[$0-2]] = [];
-                     scope_refs[$$[$0-2]].push(scopes.length - 1);
-                     this.$ = [ $$[$0-2], $$[$0] ];
+                     this.$ = $$[$0];
                    
 break;
 case 42: scopes.pop();
@@ -125,10 +131,10 @@ case 42: scopes.pop();
                             { type: 'Begin', exps: $$[$0] }
                             }; 
 break;
-case 43: scopes.pop(); scope_refs[$$[$0-2][0]].pop();
+case 43: scopes.pop();
                      this.$ = { type: 'Lambda', 
                             depth: scopes.length,
-                            args: $$[$0-2][1], body:
+                            args: $$[$0-2], body:
                             { type: 'Begin', exps: $$[$0] }
                           }; 
 break;
@@ -495,7 +501,7 @@ case 22: return 9;
 break;
 }
 },
-rules: [/^(?:[\s]*;[^\n]*)/,/^(?:set!)/,/^(?:lambda\b)/,/^(?:if\b)/,/^(?:begin\b)/,/^(?:0x[0-9a-fA-F]+)/,/^(?:0[0-7]*)/,/^(?:[+\-]0+)/,/^(?:[+\-]?[0-9]*\.[0-9]+)/,/^(?:[+\-]?[1-9][0-9]*)/,/^(?:([a-zA-Z!@#$%\^&*_\-+=])([a-zA-Z0-9!@#$%\^&*_\-+=])*)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([a-zA-Z0-9!@#$%\^&*_\-+=])+)/,/^(?::)/,/^(?:\.)/,/^(?:\([\s]*)/,/^(?:[\s]*\))/,/^(?:\[[\s]*)/,/^(?:[\s]*\])/,/^(?:\{[\s]*)/,/^(?:[\s]*\})/,/^(?:[\s\n]+)/,/^(?:$)/],
+rules: [/^(?:[\s]*;[^\n]*)/,/^(?:set!)/,/^(?:lambda\b)/,/^(?:if\b)/,/^(?:begin\b)/,/^(?:0x[0-9a-fA-F]+)/,/^(?:0[0-7]*)/,/^(?:[+\-]0+)/,/^(?:[+\-]?[0-9]*\.[0-9]+)/,/^(?:[+\-]?[1-9][0-9]*)/,/^(?:([a-zA-Z!@#$%\^&*_\-+=<>/?\|])([a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|])*)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|])+)/,/^(?::)/,/^(?:\.)/,/^(?:\([\s]*)/,/^(?:[\s]*\))/,/^(?:\[[\s]*)/,/^(?:[\s]*\])/,/^(?:\{[\s]*)/,/^(?:[\s]*\})/,/^(?:[\s\n]+)/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],"inclusive":true}}
 };
 return lexer;

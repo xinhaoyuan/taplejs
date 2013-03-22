@@ -1,7 +1,7 @@
 %lex
 
-SYMSTART                   [a-zA-Z!@#$%\^&*_\-+=]
-SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=]
+SYMSTART                   [a-zA-Z!@#$%\^&*_\-+=<>/?\|]
+SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|]
 
 %%
 
@@ -50,24 +50,26 @@ ProgEnd          : Sep
 Prog             : ProgStart UnamedExprSeq ProgEnd EOF
                    { 
                      $$ = { type: 'Begin', exps: $2 };
-                     if (typeof console != "undefined") console.log("%j", $$);
                      return $$;
                    }
                  ;
 
 Ref              : SYMBOL
                    { 
-                     var idx;
-                     if ($scopes.length > 0)
+                     var idx = -1;
+                     var depth = -1;
+                     for (depth = $scopes.length - 1; depth >= 0; -- depth)
                      {
-                        var scope = $scopes[$scopes.length - 1];
+                        var scope = $scopes[depth];
                         idx = $1 == scope.extra ? scope.named.length : scope.named.indexOf($1);
-                     } else idx = -1;
+                        if (idx == -1 && $1 == scope.name) break;
+                        if (idx >= 0) break;
+                     } 
+
                      if (idx >= 0) 
-                        $$ = { type: 'LexicalRef', name: $1, index: idx };
-                     else if ($1 in $scope_refs) {
-                        var s = $scope_refs[$1];
-                        $$ = { type: 'ScopeRef', name: $1, index: s[s.length - 1] };
+                        $$ = { type: 'LexicalRef', name: $1, offset: idx, index: depth };
+                     else if (depth >= 0) {
+                        $$ = { type: 'ScopeRef', name: $1, index: depth };
                      }
                      else
                      {
@@ -76,9 +78,15 @@ Ref              : SYMBOL
                    }
                  | LAMBDA '.' SYMBOL
                    {
-                     if ($3 in $scope_refs) {
-                          var s = $scope_refs[$3];
-                          $$ = { type: 'LambdaRef', name: $3, index: s[s.length - 1] };
+                     var depth = -1;
+                     for (depth = $scopes.length - 1; depth >= 0; -- depth)
+                     {
+                        var scope = $scopes[depth];
+                        if ($3 == scope.name) break;
+                     }
+
+                     if (depth >= 0) {
+                          $$ = { type: 'LambdaRef', name: $3, index: depth };
                      }
                      else
                      {
@@ -167,7 +175,7 @@ IfSeq            : IF SEP Expr SEP Expr SEP Expr
                  ;
 
 UnnamedLambdaDef : LAMBDA SEP ArgsList
-                   { 
+                   {
                      $scopes.push($3);
                      $$ = $3;
                    }
@@ -175,11 +183,9 @@ UnnamedLambdaDef : LAMBDA SEP ArgsList
 
 NamedLambdaDef   : LAMBDA SEP SYMBOL SEP ArgsList
                    {
+                     $5.name = $3;
                      $scopes.push($5); 
-                     if (!($3 in $scope_refs))
-                        $scope_refs[$3] = [];
-                     $scope_refs[$3].push($scopes.length - 1);
-                     $$ = [ $3, $5 ];
+                     $$ = $5;
                    }
                  ;
 
@@ -191,10 +197,10 @@ LambdaSeq        : UnnamedLambdaDef SEP UnamedExprSeq
                             { type: 'Begin', exps: $3 }
                             }; }
                  | NamedLambdaDef SEP UnamedExprSeq
-                   { $scopes.pop(); $scope_refs[$1[0]].pop();
+                   { $scopes.pop();
                      $$ = { type: 'Lambda', 
                             depth: $scopes.length,
-                            args: $1[1], body:
+                            args: $1, body:
                             { type: 'Begin', exps: $3 }
                           }; }
                  ;

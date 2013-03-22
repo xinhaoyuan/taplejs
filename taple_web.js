@@ -23,4 +23,11 @@ $(window).load(function() {
         $("#taple_console").prepend($("<pre/>").text(msg));
         return false;
     })
+
+    $("#taple_input").keyup(function(e) {
+        while($(this).outerHeight() < this.scrollHeight) {
+            $(this).height($(this).height()+10);
+        };
+        return true;
+    });
 })

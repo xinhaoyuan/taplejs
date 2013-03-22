@@ -114,7 +114,7 @@ function import_module(name)
     {
         modules[name].loading = true;
         var scope = new Object();
-        scope.__global = { require: __require }
+        scope.__global = { require: __require, math: math }
         eval_taple_text(modules[name].source, scope);
         modules[name].exports = scope.__global.exports;
         modules[name].loaded = true;
@@ -126,8 +126,12 @@ function import_module(name)
 __require = __wrap_js_func(["name"], import_module);
 
 var modules = { }
-
-var eval_scope = { __global: { require: __require } };
+var math = {'<': __wrap_js_func([], function(a,b){return a<b;}),
+            '=': __wrap_js_func([], function(a,b){return a==b;}),
+            '>':__wrap_js_func([], function(a,b){return a>b;}),
+            '-':__wrap_js_func([], function(a,b){return a-b;}),
+           }
+var eval_scope = { __global: { require: __require, math: math }};
 function eval_taple(source)
 {
     return eval_taple_text(source, eval_scope);
