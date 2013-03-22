@@ -7,6 +7,15 @@ modules['io'] = { loaded: true,
                   }
                 };
 
+modules['math'] = { loaded: true,
+                    exports: {
+                        '<': __wrap_js_func([], function(a,b){return a<b;}),
+                        '=': __wrap_js_func([], function(a,b){return a==b;}),
+                        '>': __wrap_js_func([], function(a,b){return a>b;}),
+                        '-': __wrap_js_func([], function(a,b){return a-b;})
+                    }
+                  };
+
 $(window).load(function() {
     $("#taple_input_form").submit(function() {
         var msg;
@@ -24,7 +33,14 @@ $(window).load(function() {
         return false;
     })
 
-    $("#taple_input").keyup(function(e) {
+    $(".sample-code").click(function(e) {
+        $.get($(this).attr("href"), function(data) {
+            $("#taple_input").val(data).change().focus();
+        }, "text");
+        return false;
+    });
+
+    var autogrow = function(e) {
         if (e.keyCode == 13 && e.ctrlKey)
         {
             $("#taple_input_form").submit();
@@ -37,5 +53,7 @@ $(window).load(function() {
             };
             return true;
         }
-    });
+    };
+
+    $("#taple_input").keyup(autogrow).change(autogrow);
 })
