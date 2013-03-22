@@ -25,9 +25,17 @@ $(window).load(function() {
     })
 
     $("#taple_input").keyup(function(e) {
-        while($(this).outerHeight() < this.scrollHeight) {
-            $(this).height($(this).height()+10);
-        };
-        return true;
+        if (e.keyCode == 13 && e.ctrlKey)
+        {
+            $("#taple_input_form").submit();
+            return false;
+        }
+        else
+        {
+            while($(this).outerHeight() < this.scrollHeight) {
+                $(this).height($(this).height()+10);
+            };
+            return true;
+        }
     });
 })
