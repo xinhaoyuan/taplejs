@@ -42,7 +42,7 @@ Sep              :
                  ;
 
 ProgStart        : Sep
-                   { $scopes = []; $scope_refs = {}; }
+                   { $scopes = []; }
                  ;
 
 ProgEnd          : Sep
