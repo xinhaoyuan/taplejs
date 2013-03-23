@@ -102,7 +102,7 @@ Ref              : SYMBOL
                    }
                  | Expr '.' SYMBOL
                    { $$ = { type: 'LookupRef', base: $1, name: $3 }; }
-                 | Expr ':' Expr
+                 | Expr '.' SExpr
                    { $$ = { type: 'LookupExp', base: $1, ref: $3 }; }
                  ;
 
@@ -111,21 +111,6 @@ SymbolSeq        : SYMBOL
                  | SymbolSeq SEP SYMBOL
                    {{ $$ = $1; $$.push($3); }}
                  ;
-
-SymbolList       : LB0 RB0
-                   { $$ = []; }
-                 | LB1 RB1
-                   { $$ = []; }
-                 | LB2 RB2
-                   { $$ = []; }
-                 | LB0 SymbolSeq RB0
-                   { $$ = $2 }
-                 | LB1 SymbolSeq RB1
-                   { $$ = $2 }
-                 | LB2 SymbolSeq RB2
-                   { $$ = $2 }
-                 ;
-
 
 ExtraNamedArg    : ':' SEP SYMBOL
                    { $$ = $3; }
@@ -146,27 +131,11 @@ ExtraArgs        : ExtraNamedArg
                                       
 ArgsList         : LB0 RB0
                    { $$ = { named: [], extra: {} }; }
-                 | LB1 RB1
-                   { $$ = { named: [], extra: {} }; }
-                 | LB2 RB2
-                   { $$ = { named: [], extra: {} }; }
                  | LB0 SymbolSeq RB0
-                   { $$ = { named: $2, extra: {} }; }
-                 | LB1 SymbolSeq RB1
-                   { $$ = { named: $2, extra: {} }; }
-                 | LB2 SymbolSeq RB2
                    { $$ = { named: $2, extra: {} }; }
                  | LB0 ExtraArgs RB0
                    { $$ = { named: [], extra: $2 }; }
-                 | LB1 ExtraArgs RB1
-                   { $$ = { named: [], extra: $2 }; }
-                 | LB2 ExtraArgs RB2
-                   { $$ = { named: [], extra: $2 }; }
                  | LB0 SymbolSeq SEP ExtraArgs RB0
-                   { $$ = { named: $2, extra: $4 }; }
-                 | LB1 SymbolSeq SEP ExtraArgs RB1
-                   { $$ = { named: $2, extra: $4 }; }
-                 | LB2 SymbolSeq SEP ExtraArgs RB2
                    { $$ = { named: $2, extra: $4 }; }
                  ;
 
@@ -177,20 +146,22 @@ UnamedExprSeq    : Expr
                    { $$ = $1; $$.push($3); }
                  ;
 
-NamedExprLabel   : '.' SYMBOL ':'
-                   { $$ = $2; }
+NamedExpr        : SYMBOL ':' Expr
+                   { $$ = { type:'SymbolNamedExpr', ref: $1, value: $3 }; }
+                 | SExpr  ':' Expr
+                   { $$ = { type:'ExprNamedExpr', ref: $1, value: $3 }; }
                  ;
 
-NamedExprSeq     : NamedExprLabel SEP Expr 
-                   { $$ = new Object(); $$[$1] = $3; }
-                 | NamedExprSeq SEP NamedExprLabel SEP Expr
-                   { $$ = $1; $1[$3] = $5; }
+NamedExprSeq     : NamedExpr 
+                   { $$ = [$1]; }
+                 | NamedExprSeq SEP NamedExpr
+                   { $$.push($3); }
                  ;
 
 SExprSeq         : UnamedExprSeq
                    { $$ = { type: 'Apply', seq: $1 }; }
                  | UnamedExprSeq SEP NamedExprSeq
-                   { $$ = { type: 'Apply', seq: $1, table: $3  }; }
+                   { $$ = { type: 'Apply', seq: $1, named: $3 }; }
                  | SetSeq
                  | BeginSeq
                  | IfSeq
@@ -261,16 +232,19 @@ Number           : ZERO
                    { $$ = { type: 'RealNumber', value: Number($1) } }
                  ;
 
+SExpr            : LB0 SExprSeq RB0
+                   { $$ = $2; }
+                 | LB1 SExprSeq RB1
+                   { $$ = $2; }
+                 | LB2 UnamedExprSeq RB2
+                   { $$ = { type: 'Begin', exps: $2 }; }
+                 ;
+
 Expr             : Ref
                  | Number
                  | STRING
                    { $$ = { type: 'String', value: $1 }; }
                  | QUOTE
                    { $$ = { type: 'Quote', value: $1 }; }
-                 | LB0 SExprSeq RB0
-                   { $$ = $2; }
-                 | LB1 SExprSeq RB1
-                   { $$ = $2; }
-                 | LB2 SExprSeq RB2
-                   { $$ = $2; }
+                 | SExpr
                  ;

@@ -30,18 +30,23 @@ function compile2js(ast)
         return "(" + compile2js(ast.ref) + "=" + compile2js(ast.value) + ")";
     }
     else if (ast.type == "Apply") {
-        result = "(" + compile2js(ast.seq[0]) + "({'.unnamed':["
+        result = "(" + compile2js(ast.seq[0]);
+        result += "(function(){"
+        if ('named' in ast) {
+            for (var i = 0; i < ast.named.length; ++ i) {
+                if (ast.named[i].type == "SymbolNamedExpr")
+                    result += "this['" + ast.named[i].ref + "']=" + compile2js(ast.named[i].value) + ";"
+                if (ast.named[i].type == "ExprNamedExpr")
+                    result += "this[" + compile2js(ast.named[i].ref) + "]=" + compile2js(ast.named[i].value) + ";"
+            }
+        }
+        result += "this['.unnamed']=["
         for (var i = 1; i < ast.seq.length; ++ i) {
             if (i > 1) result += ",";
             result += compile2js(ast.seq[i]);
         }
-        result += "]";
-        if ("table" in ast) {
-            for (var i in ast.table) {
-                result += ", '" + i + "':" + compile2js(ast.table[i]);
-            }
-        }
-        result += "}))";
+        result += "];return this;}.call({})))";
+        console.log(result);
         return result;
     }
     else if (ast.type == "Lambda") {
@@ -96,7 +101,8 @@ if (typeof require != "undefined")
 
 function eval_taple_text(source, scope)
 {
-    return (new Function("with(this){ return" + compile2js(taple_parser.parse(source)) + "}")).call(scope)
+    var ast = taple_parser.parse(source);
+    return (new Function("with(this){ return" + compile2js(ast) + "}")).call(scope)
 }
 
 // Runtime
