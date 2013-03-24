@@ -2,10 +2,11 @@
 
 SYMSTART                   [a-zA-Z!@#$%\^&*_\-+=<>/?\|]
 SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|]
+SEPCHARS                   [\s\n]
 
 %%
 
-[\s]*";"[^\n]*             { /* comment */ }
+({SEPCHARS}|";"[^\n]*)+    { return 'SEP' }
 "set!"                     { return 'SET'; }
 "lambda"                   { return 'LAMBDA'; }
 "if"                       { return 'IF'; }
@@ -20,13 +21,12 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|]
 "'"{SYMCHARS}+             { return 'QUOTE'; }
 ":"                        { return ':'; }
 "."                        { return '.'; }
-"("[\s]*                   { return 'LB0'; }
-[\s]*")"                   { return 'RB0'; }
-"["[\s]*                   { return 'LB1'; }
-[\s]*"]"                   { return 'RB1'; }
-"{"[\s]*                   { return 'LB2'; }
-[\s]*"}"                   { return 'RB2'; }
-[\s\n]+                    { return 'SEP'; }
+"("({SEPCHARS}|";"[^\n]*)* { return 'LB0'; }
+({SEPCHARS}|";"[^\n]*)*")" { return 'RB0'; }
+"["({SEPCHARS}|";"[^\n]*)* { return 'LB1'; }
+({SEPCHARS}|";"[^\n]*)*"]" { return 'RB1'; }
+"{"({SEPCHARS}|";"[^\n]*)* { return 'LB2'; }
+({SEPCHARS}|";"[^\n]*)*"}" { return 'RB2'; }
 <<EOF>>                    { return 'EOF'; }
 
 /lex
