@@ -1,0 +1,6 @@
+Simple taple parser and compiler (to javascript) written in Javascript.
+
+Requirements:
+
+  - Node.js
+  - jison
