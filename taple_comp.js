@@ -31,17 +31,19 @@ Compiler.prototype = {
             return "(" + String(expr.value) + ")";
         case "String":
             return expr.value;
+        case "EmptyExprSeq":
         case "EmptyTExpr":
             return "(null)";
             // Binding
         case "Symbol":
             return this.compile_binding(scope, expr.value);
             // Composed expression
+        case "MultiTExpr":
+            return this.compile_begin(scope, expr.exprs, 0);
+        case "ExprSeq":
+            // Special case for ExprSeq
+            if (expr.ordered.length == 1 && expr.named.length == 0) return this.compile_eval(scope, expr.ordered[0]);
         case "TExpr": {
-            if (expr.symbol == "{") {
-                if (expr.named.length != 0) throw "``begin'' expr does not accept named part";
-                return this.compile_begin(scope, expr.ordered, 0);
-            }
             var head = this.extract_expr(scope, expr.ordered[0]);
             if (head.expr.type == "Symbol") {
                 switch (head.expr.value) {
@@ -130,8 +132,9 @@ Compiler.prototype = {
         var result = "(";
         for (var i = start; i < exprs.length; ++ i) {
             result += this.compile_eval(scope, exprs[i]);
-            result += i == exprs.length - 1 ? ")" : ",";
+            result += i == exprs.length - 1 ? "" : ",";
         }
+        result += ")";
         return result;
     },
 

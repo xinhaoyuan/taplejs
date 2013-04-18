@@ -35,8 +35,10 @@ SYMCHARS                   [a-zA-Z0-9!@#$%\^&*_\-+=<>/?\|]
 %start ExprString
 %%
 
-ExprString       : OrderedExprSeq EOF
-                   { $$ = $1; return $$; }
+ExprString       : MultiExprSeq EOF
+                   { $$ = $1.exprs; console.log($$); return $$;}
+                 | OrderedExprSeq EOF
+                   { $$ = $1; console.log($$); return $$; }
                  ;
 
 LValue           : SYMBOL
@@ -65,20 +67,35 @@ NamedExprSeq     : NamedExpr
                    { $$.push($2); }
                  ;
 
-TExprSeq         : { $$ = { type: 'EmptyTExpr' }; }
+ExprSeq          : { $$ = { type: 'EmptyExprSeq' }; }
                  | OrderedExprSeq
-                   { $$ = { type: 'TExpr', ordered: $1, named: [] }; }
+                   { $$ = { type: 'ExprSeq', ordered: $1, named: [] }; }
                  | OrderedExprSeq NamedExprSeq
-                   { $$ = { type: 'TExpr', ordered: $1, named: $2 }; }
+                   { $$ = { type: 'ExprSeq', ordered: $1, named: $2 }; }
                  | NamedExprSeq
-                   { $$ = { type: 'TExpr', ordered: [], named: $1 }; }
+                   { $$ = { type: 'ExprSeq', ordered: [], named: $1 }; }
                  ;
 
-TExpr            : LB0 TExprSeq RB0
+MultiExprSeq     : ExprSeq ',' ExprSeq
+                   { $$ = { type: 'MultiExprSeq', exprs: [$1, $3] } }
+                 | MultiExprSeq ',' ExprSeq
+                   {
+                     $1.exprs.push($3);
+                     $$ = $1;
+                   }
+                 ;
+
+InsideTExpr      : ExprSeq
+                   { $$ = $1; $$.type = $$.type == 'EmptyExprSeq' ? 'EmptyTExpr' : 'TExpr'; }
+                 | MultiExprSeq
+                   { $$ = $1; $$.type = 'MultiTExpr'; }
+                 ;
+
+TExpr            : LB0 InsideTExpr RB0
                    { $$ = $2; $$.symbol = $1; }
-                 | LB1 TExprSeq RB1
+                 | LB1 InsideTExpr RB1
                    { $$ = $2; $$.symbol = $1; }
-                 | LB2 TExprSeq RB2
+                 | LB2 InsideTExpr RB2
                    { $$ = $2; $$.symbol = $1; }
                  ;
 
